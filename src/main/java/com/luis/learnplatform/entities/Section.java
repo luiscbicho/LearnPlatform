@@ -2,6 +2,8 @@ package com.luis.learnplatform.entities;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -24,6 +26,8 @@ public class Section {
     @JoinColumn(name="prerequisite_id")
     private Section prerequisite;
 
+    @OneToMany(mappedBy = "section")
+    private List<Lesson> lessons=new ArrayList<>();
 
     public Section() {
     }
