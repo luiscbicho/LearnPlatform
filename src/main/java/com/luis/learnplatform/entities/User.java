@@ -21,6 +21,9 @@ public class User {
     @JoinTable(name="tb_user_role",joinColumns = @JoinColumn(name="user_id"),inverseJoinColumns = @JoinColumn(name="role_id"))
     private Set<Role> roles=new HashSet<>();
 
+    @OneToMany(mappedBy = "user")
+    private Set<Notification> notifications=new HashSet<>();
+
     public User() {
     }
 
@@ -65,6 +68,10 @@ public class User {
 
     public Set<Role> getRoles() {
         return roles;
+    }
+
+    public Set<Notification> getNotifications() {
+        return notifications;
     }
 
     @Override
