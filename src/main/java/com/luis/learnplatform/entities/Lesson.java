@@ -24,7 +24,11 @@ public abstract class Lesson {
     private Set<Enrollment> enrollmentsDone=new HashSet<>();
 
     @OneToMany(mappedBy = "lesson")
-    private List<Deliver> delivers=new ArrayList<>();
+    private List<Deliver> deliveries=new ArrayList<>();
+
+    @OneToMany(mappedBy = "lesson")
+    private List<Topic> topics=new ArrayList<>();
+
 
 
     public Lesson() {
@@ -72,6 +76,14 @@ public abstract class Lesson {
 
     public Set<Enrollment> getEnrollmentsDone() {
         return enrollmentsDone;
+    }
+
+    public List<Deliver> getDeliveries() {
+        return deliveries;
+    }
+
+    public List<Topic> getTopics() {
+        return topics;
     }
 
     @Override

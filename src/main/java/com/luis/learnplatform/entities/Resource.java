@@ -96,6 +96,10 @@ public class Resource {
         this.offer = offer;
     }
 
+    public List<Section> getSections() {
+        return sections;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;

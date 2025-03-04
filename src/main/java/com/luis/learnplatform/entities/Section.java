@@ -98,6 +98,10 @@ public class Section {
         this.prerequisite = prerequisite;
     }
 
+    public List<Lesson> getLessons() {
+        return lessons;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
