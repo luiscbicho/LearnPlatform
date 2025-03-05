@@ -15,9 +15,6 @@ public class Role {
     private Long id;
     private String authority;
 
-    @ManyToMany(mappedBy = "roles")
-    private Set<User> users=new HashSet<>();
-
 
     public Role() {
     }
@@ -43,15 +40,11 @@ public class Role {
         this.authority = authority;
     }
 
-    public Set<User> getUsers() {
-        return users;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Role role = (Role) o;
-        return id == role.id;
+        return Objects.equals(id, role.id);
     }
 
     @Override
