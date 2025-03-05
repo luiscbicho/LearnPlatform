@@ -47,14 +47,17 @@ public class UserService {
     @Transactional
     public UserDTO insert(UserInsertDTO dto) {
         User user = new User();
-        user.setName(dto.getName());
-        user.setEmail(dto.getEmail());
-        user.setPassword(passwordEncoder.encode(dto.getPassword()));
-        for(RoleDTO x : dto.getRoles()){
-            Role role = roleRepository.findByName(x.getAuthority()).orElseThrow(()->new ResourceNotFoundException());
-            user.getRoles().add(role);
-        }
-        repository.save(user);
+        update(user,dto);
+        user = repository.save(user);
+        return new UserDTO(user);
+    }
+
+    @Transactional
+    public UserDTO update(Long id, UserInsertDTO dto) {
+        User user = repository.findById(id).orElseThrow(()->new ResourceNotFoundException());
+        user.getRoles().clear();
+        update(user, dto);
+        user = repository.save(user);
         return new UserDTO(user);
     }
 
@@ -68,6 +71,16 @@ public class UserService {
         }
         catch(DataIntegrityViolationException e){
             throw new DatabaseException(e.getMessage());
+        }
+    }
+
+    private void update(User user, UserInsertDTO dto) {
+        user.setName(dto.getName());
+        user.setEmail(dto.getEmail());
+        user.setPassword(passwordEncoder.encode(dto.getPassword()));
+        for(RoleDTO x : dto.getRoles()){
+            Role role = roleRepository.getReferenceById(x.getId());
+            user.getRoles().add(role);
         }
     }
 

@@ -24,7 +24,7 @@ public class UserDTO {
     }
 
     public UserDTO(User user) {
-        this.id = user.getId();
+        id = user.getId();
         name=user.getName();
         email=user.getEmail();
         for(Role role : user.getRoles()) {
