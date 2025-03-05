@@ -8,10 +8,13 @@ import com.luis.learnplatform.entities.User;
 import com.luis.learnplatform.repositories.RoleRepository;
 import com.luis.learnplatform.repositories.UserRepository;
 
+import com.luis.learnplatform.services.exceptions.DatabaseException;
 import com.luis.learnplatform.services.exceptions.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -53,6 +56,19 @@ public class UserService {
         }
         repository.save(user);
         return new UserDTO(user);
+    }
+
+    @Transactional(propagation = Propagation.SUPPORTS)
+    public void delete(Long id) {
+        if(!repository.existsById(id)){
+            throw new ResourceNotFoundException();
+        }
+        try{
+            repository.deleteById(id);
+        }
+        catch(DataIntegrityViolationException e){
+            throw new DatabaseException(e.getMessage());
+        }
     }
 
 }
