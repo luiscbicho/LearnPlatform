@@ -11,8 +11,11 @@ import com.luis.learnplatform.repositories.UserRepository;
 
 import com.luis.learnplatform.services.exceptions.DatabaseException;
 import com.luis.learnplatform.services.exceptions.ResourceNotFoundException;
+import com.nimbusds.jwt.JWT;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -101,5 +104,23 @@ public class UserService implements UserDetailsService {
         }
         return user;
 
+    }
+
+    @Transactional(readOnly = true)
+    public UserDTO getMe(){
+        User user = authenticated();
+        return new UserDTO(user);
+    }
+
+    protected User authenticated(){
+        try{
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            JWT jwt = (JWT) authentication.getPrincipal();
+            String username=jwt.getJWTClaimsSet().getStringClaim("username");
+            return repository.findByEmail(username).get();
+        }
+        catch(Exception e){
+            throw new UsernameNotFoundException("User not found");
+        }
     }
 }

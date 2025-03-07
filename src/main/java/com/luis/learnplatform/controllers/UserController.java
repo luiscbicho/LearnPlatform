@@ -30,6 +30,12 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<UserDTO> getMe() {
+        UserDTO user = service.getMe();
+        return ResponseEntity.ok(user);
+    }
+
     @PostMapping
     public ResponseEntity<UserDTO> insert(@RequestBody UserInsertDTO dto) {
         UserDTO userDTO = service.insert(dto);
@@ -49,7 +55,5 @@ public class UserController {
         service.delete(id);
         return ResponseEntity.noContent().build();
     }
-
-
 
 }
