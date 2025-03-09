@@ -11,15 +11,13 @@ import com.luis.learnplatform.repositories.UserRepository;
 
 import com.luis.learnplatform.services.exceptions.DatabaseException;
 import com.luis.learnplatform.services.exceptions.ResourceNotFoundException;
-import com.nimbusds.jwt.JWT;
+import com.luis.learnplatform.util.CustomUserUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,7 +33,9 @@ public class UserService implements UserDetailsService {
     @Autowired
     private RoleRepository roleRepository;
     @Autowired
-    private BCryptPasswordEncoder passwordEncoder;
+    private PasswordEncoder passwordEncoder;
+    @Autowired
+    private CustomUserUtil customUserUtil;
 
     @Transactional(readOnly = true)
     public List<UserDTO> findAll() {
@@ -91,36 +91,32 @@ public class UserService implements UserDetailsService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        List<UserDetailsProjection> list = repository.searchUserAndRolesByEmail(email);
-        if(list.isEmpty()){
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        List<UserDetailsProjection> result = repository.searchUserAndRolesByEmail(username);
+        if (result.isEmpty()) {
             throw new UsernameNotFoundException("User not found");
         }
         User user = new User();
-        user.setEmail(list.get(0).getUsername());
-        user.setPassword(list.get(1).getPassword());
-        for(UserDetailsProjection x : list){
-            user.getRoles().add(new Role(x.getRoleId(),x.getAuthority()));
+        user.setEmail(username);
+        user.setPassword(result.get(0).getPassword());
+        for (UserDetailsProjection projection : result) {
+            user.getRoles().add(new Role(projection.getRoleId(), projection.getAuthority()));
         }
         return user;
+    }
 
+    protected User authenticated() {
+        try {
+            String username = customUserUtil.getLoggedUser();
+            return repository.findByEmail(username).get();
+        } catch (Exception e) {
+            throw new UsernameNotFoundException("Email not found");
+        }
     }
 
     @Transactional(readOnly = true)
-    public UserDTO getMe(){
+    public UserDTO getMe() {
         User user = authenticated();
         return new UserDTO(user);
-    }
-
-    protected User authenticated(){
-        try{
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            JWT jwt = (JWT) authentication.getPrincipal();
-            String username=jwt.getJWTClaimsSet().getStringClaim("username");
-            return repository.findByEmail(username).get();
-        }
-        catch(Exception e){
-            throw new UsernameNotFoundException("User not found");
-        }
     }
 }

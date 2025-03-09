@@ -1,6 +1,7 @@
 package com.luis.learnplatform.controllers.exceptions;
 
 import com.luis.learnplatform.services.exceptions.DatabaseException;
+import com.luis.learnplatform.services.exceptions.ForbiddenException;
 import com.luis.learnplatform.services.exceptions.ResourceNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
@@ -26,6 +27,14 @@ public class ResourceExceptionHandler {
         String error ="Invalid request: Unable to process the database operation.";
         HttpStatus status = HttpStatus.BAD_REQUEST;
         StandardError err = new StandardError(Instant.now(), status.value(), error,e.getMessage(),request.getRequestURI());
+        return ResponseEntity.status(status).body(err);
+    }
+
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<StandardError> forbidden(ForbiddenException e, HttpServletRequest request) {
+        String error ="You do not have permission to access this resource";
+        HttpStatus status = HttpStatus.FORBIDDEN;
+        StandardError err = new StandardError(Instant.now(), status.value(),error, e.getMessage(), request.getRequestURI());
         return ResponseEntity.status(status).body(err);
     }
 
