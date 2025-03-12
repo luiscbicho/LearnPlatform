@@ -9,6 +9,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 
 import java.util.List;
 import java.util.Optional;
@@ -21,7 +23,7 @@ public class UserRepositoryTests {
 
     private Long existingId;
     private Long nonExistingId;
-    private String existingEmail;
+    private String existingEmail,existingName, nonExistingName;
     private String nonExistingEmail;
     private Long expectedCountTotal;
     private Long expectedId;
@@ -30,6 +32,8 @@ public class UserRepositoryTests {
     @BeforeEach
     void setUp() {
 
+        existingName="Alex Brown";
+        nonExistingName="Julieta";
         existingId = 1L;
         nonExistingId = 100L;
         existingEmail = "bob@gmail.com";
@@ -42,9 +46,33 @@ public class UserRepositoryTests {
     }
 
     @Test
-    public void findAllShouldReturnAllUsers() {
-        List<User> users = userRepository.findAll();
-        Assertions.assertFalse(users.isEmpty());
+    public void findByNameContainingIgnoreCaseShouldReturnPageWithSpecificNameWhenNameExists(){
+        PageRequest pageRequest = PageRequest.of(0, 2);
+        Page<User> users = userRepository.findByNameContainingIgnoreCase(existingName,pageRequest);
+        Assertions.assertTrue(users.hasContent());
+        Assertions.assertEquals(users.getContent().get(0).getName(),existingName);
+        Assertions.assertEquals(1,users.getContent().size());
+    }
+
+    @Test
+    public void findByEmailContainingIgnoreCaseShouldReturnEmptyPageWhenNameNull(){
+        PageRequest pageRequest = PageRequest.of(0, 2);
+        Page<User> users = userRepository.findByNameContainingIgnoreCase(null,pageRequest);
+        Assertions.assertTrue(users.isEmpty());
+    }
+
+    @Test
+    public void findByEmailContainingIgnoreCaseShouldReturnEmptyPageWhenNameDoesNotExist(){
+        PageRequest pageRequest = PageRequest.of(0, 2);
+        Page<User> users = userRepository.findByNameContainingIgnoreCase(nonExistingName,pageRequest);
+        Assertions.assertTrue(users.isEmpty());
+    }
+
+    @Test
+    public void findAllShouldReturnAllUsersPaged() {
+        PageRequest pageRequest = PageRequest.of(0, 2);
+        Page<User> users = userRepository.findAll(pageRequest);
+        Assertions.assertEquals(users.getTotalElements(),userRepository.count());
     }
 
     @Test

@@ -4,6 +4,9 @@ import com.luis.learnplatform.entities.DTO.UserDTO;
 import com.luis.learnplatform.entities.DTO.UserInsertDTO;
 import com.luis.learnplatform.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -20,10 +23,15 @@ public class UserController {
     private UserService service;
 
 
+    //GET http://localhost:8080/users?name=alex
+    //GET http://localhost:8080/users?name=alex&page=1&size=5
+    //GET http://localhost:8080/users?sort=id,desc
     @GetMapping
-    public ResponseEntity<List<UserDTO>> findAll() {
-        List<UserDTO> users = service.findAll();
-        return ResponseEntity.ok(users);
+    public ResponseEntity<Page<UserDTO>>findAll(
+            @RequestParam(required = false) String name,
+            @PageableDefault(size = 10, sort = "name") Pageable pageable) {
+         Page<UserDTO> page = service.findAll(name, pageable);
+         return ResponseEntity.ok(page);
     }
 
     @GetMapping("/{id}")
@@ -45,13 +53,14 @@ public class UserController {
         return ResponseEntity.created(uri).body(userDTO);
     }
 
+
     @PutMapping(value="/{id}")
     public ResponseEntity<UserDTO> update(@PathVariable Long id, @RequestBody UserInsertDTO dto) {
         UserDTO newDto = service.update(id,dto);
         return ResponseEntity.ok(newDto);
     }
 
-
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping(value="/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);

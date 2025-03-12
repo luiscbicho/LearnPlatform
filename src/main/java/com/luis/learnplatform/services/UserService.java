@@ -10,10 +10,14 @@ import com.luis.learnplatform.repositories.RoleRepository;
 import com.luis.learnplatform.repositories.UserRepository;
 
 import com.luis.learnplatform.services.exceptions.DatabaseException;
+import com.luis.learnplatform.services.exceptions.ForbiddenException;
 import com.luis.learnplatform.services.exceptions.ResourceNotFoundException;
 import com.luis.learnplatform.util.CustomUserUtil;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -23,7 +27,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class UserService implements UserDetailsService {
@@ -37,11 +40,16 @@ public class UserService implements UserDetailsService {
     @Autowired
     private CustomUserUtil customUserUtil;
 
+
     @Transactional(readOnly = true)
-    public List<UserDTO> findAll() {
-        List<User> users = repository.findAll();
-        List<UserDTO> usersDTO=users.stream().map(user -> new UserDTO(user)).collect(Collectors.toList());
-        return usersDTO;
+    public Page<UserDTO> findAll(String name, Pageable pageable) {
+        Page<User> users;
+        if (name == null || name.trim().isEmpty()) {
+            users = repository.findAll(pageable);
+        } else {
+            users = repository.findByNameContainingIgnoreCase(name, pageable);
+        }
+        return users.map(UserDTO::new);
     }
 
     @Transactional(readOnly = true)
@@ -52,19 +60,30 @@ public class UserService implements UserDetailsService {
 
     @Transactional
     public UserDTO insert(UserInsertDTO dto) {
-        User user = new User();
-        update(user,dto);
-        user = repository.save(user);
-        return new UserDTO(user);
+        try {
+            User user = new User();
+            update(user, dto);
+            user = repository.save(user);
+            return new UserDTO(user);
+        }
+        catch(EntityNotFoundException e) {
+            throw new ResourceNotFoundException();
+        }
     }
 
     @Transactional
     public UserDTO update(Long id, UserInsertDTO dto) {
-        User user = repository.findById(id).orElseThrow(()->new ResourceNotFoundException());
-        user.getRoles().clear();
-        update(user, dto);
-        user = repository.save(user);
-        return new UserDTO(user);
+        try {
+            validateSelfOrAdmin(id);
+            User user = repository.getReferenceById(id);
+            user.getRoles().clear();
+            update(user, dto);
+            user = repository.save(user);
+            return new UserDTO(user);
+        }
+        catch (EntityNotFoundException e) {
+            throw new ResourceNotFoundException();
+        }
     }
 
     @Transactional(propagation = Propagation.SUPPORTS)
@@ -80,7 +99,7 @@ public class UserService implements UserDetailsService {
         }
     }
 
-    private void update(User user, UserInsertDTO dto) {
+    protected void update(User user, UserInsertDTO dto) {
         user.setName(dto.getName());
         user.setEmail(dto.getEmail());
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
@@ -118,5 +137,15 @@ public class UserService implements UserDetailsService {
     public UserDTO getMe() {
         User user = authenticated();
         return new UserDTO(user);
+    }
+
+    public void validateSelfOrAdmin(Long userId) {
+        User me = authenticated();
+        if (me.hasRole("ROLE_ADMIN")) {
+            return;
+        }
+        if (!me.getId().equals(userId)) {
+            throw new ForbiddenException("You do not have permission to access this resource");
+        }
     }
 }
