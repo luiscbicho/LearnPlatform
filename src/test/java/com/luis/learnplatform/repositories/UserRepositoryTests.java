@@ -38,11 +38,11 @@ public class UserRepositoryTests {
         nonExistingId = 100L;
         existingEmail = "bob@gmail.com";
         nonExistingEmail = "julio@gdsdmail.com";
-        expectedCountTotal = 4L;
+        expectedCountTotal = 5L;
         user.setName("Luis");
         user.setEmail("luis@gmail.com");
         user.setPassword("dsdsdasd");
-        expectedId = 4L;
+        expectedId = 5L;
     }
 
     @Test

@@ -91,11 +91,12 @@ public class UserService implements UserDetailsService {
         if(!repository.existsById(id)){
             throw new ResourceNotFoundException();
         }
-        try{
+        User user = repository.getReferenceById(id);
+        if(user.getEnrollments().isEmpty()){
             repository.deleteById(id);
         }
-        catch(DataIntegrityViolationException e){
-            throw new DatabaseException(e.getMessage());
+        else{
+            throw new DatabaseException("Could not execute statement");
         }
     }
 

@@ -1,6 +1,7 @@
 INSERT INTO tb_user (name, email, password) VALUES ('Alex Brown', 'alex@gmail.com', '$2a$10$Bj5WmQKQSPjJ4ckqs2YUpuwwTnW07E6zsnRNtx5Xc7gexR1UeOodm');
 INSERT INTO tb_user (name, email, password) VALUES ('Bob Brown', 'bob@gmail.com', '$2a$10$Bj5WmQKQSPjJ4ckqs2YUpuwwTnW07E6zsnRNtx5Xc7gexR1UeOodm');
 INSERT INTO tb_user (name, email, password) VALUES ('Maria Green', 'maria@gmail.com', '$2a$10$Bj5WmQKQSPjJ4ckqs2YUpuwwTnW07E6zsnRNtx5Xc7gexR1UeOodm');
+INSERT INTO tb_user (name, email, password) VALUES ('Joana Santos', 'joana@gmail.com', '$2a$10$Bj5WmQKQSPjJ4ckqs2YUpuwwTnW07E6zsnRNtx5Xc7gexR1UeOodm');
 
 INSERT INTO tb_role (authority) VALUES ('ROLE_STUDENT');
 INSERT INTO tb_role (authority) VALUES ('ROLE_INSTRUCTOR');

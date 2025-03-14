@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.io.Serializable;
+
 import java.util.*;
 
 @Entity
@@ -25,6 +25,9 @@ public class User implements UserDetails{
 
     @OneToMany(mappedBy = "user")
     private Set<Notification> notifications=new HashSet<>();
+
+    @OneToMany(mappedBy = "id.user")
+    private Set<Enrollment> enrollments=new HashSet<>();
 
     public User() {
     }
@@ -104,6 +107,10 @@ public class User implements UserDetails{
 
     public Set<Notification> getNotifications() {
         return notifications;
+    }
+
+    public Set<Enrollment> getEnrollments() {
+        return enrollments;
     }
 
     public boolean hasRole(String roleName){

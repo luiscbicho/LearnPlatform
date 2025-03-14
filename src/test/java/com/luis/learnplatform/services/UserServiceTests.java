@@ -101,6 +101,7 @@ public class UserServiceTests {
         Mockito.when(roleRepository.getReferenceById(existingRoleId)).thenReturn(role);
         Mockito.when(roleRepository.getReferenceById(nonExistingRoleId)).thenThrow(EntityNotFoundException.class);
         Mockito.when(repository.getReferenceById(existingUserId)).thenReturn(user);
+        Mockito.when(repository.getReferenceById(dependentUserId)).thenThrow(DatabaseException.class);
         Mockito.when(repository.getReferenceById(nonExistingUserId)).thenThrow(ResourceNotFoundException.class);
         Mockito.when(repository.existsById(existingUserId)).thenReturn(true);
         Mockito.when(repository.existsById(dependentUserId)).thenReturn(true);
