@@ -228,11 +228,4 @@ public class UserServiceIT {
 
         }
 
-    @Test
-    public void checkDependentUserDependencies() {
-        User dependentUser = repository.getReferenceById(dependentId);
-        System.out.println("Dependent user: " + dependentUser.getName());
-        System.out.println("Roles: " + dependentUser.getRoles().size()); // Example for roles dependency
-    }
-
 }

@@ -12,6 +12,7 @@ import com.luis.learnplatform.entities.DTO.UserInsertDTO;
 import com.luis.learnplatform.entities.User;
 import com.luis.learnplatform.factories.UserFactory;
 import com.luis.learnplatform.services.UserService;
+import com.luis.learnplatform.services.exceptions.DatabaseException;
 import com.luis.learnplatform.services.exceptions.ResourceNotFoundException;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -46,7 +47,7 @@ public class UserControllerTests {
     @Autowired
     private ObjectMapper objectMapper;
 
-    private Long existingUserId, nonExistingUserId;
+    private Long existingUserId, nonExistingUserId, dependentId;
     private User user,userAdmin;
     private UserDTO userDTO, userDTOAdmin, userInsertDTO;
     private PageImpl<UserDTO> dtos;
@@ -61,12 +62,14 @@ public class UserControllerTests {
         dtos = new PageImpl<>(List.of(userDTO, userDTOAdmin));
         existingUserId = user.getId();
         nonExistingUserId = 10L;
+        dependentId = 2L;
 
 
         Mockito.when(userService.findAll(any(),any(Pageable.class))).thenReturn(dtos);
         Mockito.when(userService.findById(existingUserId)).thenReturn(userDTO);
         Mockito.when(userService.findById(nonExistingUserId)).thenThrow(ResourceNotFoundException.class);
         Mockito.doNothing().when(userService).delete(existingUserId);
+        Mockito.doThrow(DatabaseException.class).when(userService).delete(dependentId);
         Mockito.doThrow(ResourceNotFoundException.class).when(userService).delete(nonExistingUserId);
         Mockito.when(userService.getMe()).thenReturn(userDTO);
         Mockito.when(userService.insert(any())).thenReturn(userDTO);
@@ -262,7 +265,7 @@ public class UserControllerTests {
     }
 
     @Test
-    public void deleteShouldThrowNotFoundWhenIdDoesNotExist() throws Exception {
+    public void deleteShouldReturnNotFoundWhenIdDoesNotExist() throws Exception {
         Mockito.doThrow(new ResourceNotFoundException()).when(userService).delete(nonExistingUserId);
 
         ResultActions result =
@@ -282,6 +285,15 @@ public class UserControllerTests {
 
         result.andExpect(status().isNoContent());
         result.andExpect(jsonPath("$.id").doesNotExist());
+    }
+
+    @Test
+    public void deleteShouldReturnBadRequestWhenDependentId() throws Exception {
+        ResultActions result=
+                mockMvc.perform(delete("/users/{id}", dependentId)
+                        .accept(MediaType.APPLICATION_JSON));
+
+        result.andExpect(status().isBadRequest());
     }
 
 
