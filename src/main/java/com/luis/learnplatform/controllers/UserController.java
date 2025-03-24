@@ -1,7 +1,9 @@
 package com.luis.learnplatform.controllers;
 
+import com.luis.learnplatform.entities.DTO.EnrollmentDTO;
 import com.luis.learnplatform.entities.DTO.UserDTO;
 import com.luis.learnplatform.entities.DTO.UserInsertDTO;
+import com.luis.learnplatform.services.EnrollmentService;
 import com.luis.learnplatform.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -21,6 +23,9 @@ public class UserController {
 
     @Autowired
     private UserService service;
+
+    @Autowired
+    private EnrollmentService enrollmentService;
 
 
     //GET http://localhost:8080/users?name=alex
@@ -65,6 +70,12 @@ public class UserController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping(value="/{id}/enrollments")
+    public ResponseEntity<List<EnrollmentDTO>> findEnrollmentsByUserId(@PathVariable Long id) {
+        List<EnrollmentDTO> list = enrollmentService.findEnrollmentsByUserId(id);
+        return ResponseEntity.ok(list);
     }
 
 }

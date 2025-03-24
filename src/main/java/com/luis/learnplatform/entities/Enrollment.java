@@ -26,6 +26,7 @@ public class Enrollment {
     @OneToMany(mappedBy = "enrollment")
     private List<Deliver> deliveries=new ArrayList<>();
 
+
     public Enrollment() {
     }
 

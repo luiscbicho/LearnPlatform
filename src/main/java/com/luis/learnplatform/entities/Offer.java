@@ -3,9 +3,7 @@ package com.luis.learnplatform.entities;
 import jakarta.persistence.*;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Entity
 @Table(name="tb_offer")
@@ -29,6 +27,9 @@ public class Offer {
 
     @OneToMany(mappedBy = "offer")
     private List<Topic> topics=new ArrayList<>();
+
+    @OneToMany(mappedBy = "id.offer")
+    private Set<Enrollment> enrollments=new HashSet<>();
 
     public Offer() {
     }
@@ -89,6 +90,10 @@ public class Offer {
         return topics;
     }
 
+    public Set<Enrollment> getEnrollments() {
+        return enrollments;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
@@ -100,4 +105,5 @@ public class Offer {
     public int hashCode() {
         return Objects.hashCode(id);
     }
+
 }

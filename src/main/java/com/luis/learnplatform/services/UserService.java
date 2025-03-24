@@ -15,7 +15,6 @@ import com.luis.learnplatform.services.exceptions.ResourceNotFoundException;
 import com.luis.learnplatform.util.CustomUserUtil;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -149,4 +148,5 @@ public class UserService implements UserDetailsService {
             throw new ForbiddenException("You do not have permission to access this resource");
         }
     }
+
 }
