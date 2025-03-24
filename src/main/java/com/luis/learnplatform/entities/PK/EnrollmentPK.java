@@ -1,57 +1,53 @@
 package com.luis.learnplatform.entities.PK;
 
-import com.luis.learnplatform.entities.Offer;
-import com.luis.learnplatform.entities.User;
+
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 
 import java.util.Objects;
 
 @Embeddable
 public class EnrollmentPK {
 
-    @ManyToOne
-    @JoinColumn(name="user_id")
-    private User user;
+    @Column(name="user_id")
+    private Long userId;
 
-    @ManyToOne
-    @JoinColumn(name="offer_id")
-    private Offer offer;
+    @Column(name="offer_id")
+    private Long offerId;
 
     public EnrollmentPK() {
     }
 
-    public EnrollmentPK(User user, Offer offer) {
-        this.user = user;
-        this.offer = offer;
+    public EnrollmentPK(Long userId, Long offerId) {
+        this.userId = userId;
+        this.offerId = offerId;
     }
 
-    public User getUser() {
-        return user;
+    public Long getUserId() {
+        return userId;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 
-    public Offer getOffer() {
-        return offer;
+    public Long getOfferId() {
+        return offerId;
     }
 
-    public void setOffer(Offer offer) {
-        this.offer = offer;
+    public void setOfferId(Long offerId) {
+        this.offerId = offerId;
     }
 
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         EnrollmentPK that = (EnrollmentPK) o;
-        return Objects.equals(user, that.user) && Objects.equals(offer, that.offer);
+        return Objects.equals(userId, that.userId) && Objects.equals(offerId, that.offerId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(user, offer);
+        return Objects.hash(userId, offerId);
     }
 }

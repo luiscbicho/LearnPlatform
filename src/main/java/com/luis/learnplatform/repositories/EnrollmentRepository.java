@@ -11,7 +11,7 @@ import java.util.List;
 @Repository
 public interface EnrollmentRepository extends JpaRepository<Enrollment, EnrollmentPK> {
 
-    @Query("SELECT e FROM Enrollment e WHERE e.id.user.id = :userId")
-    List<Enrollment> findEnrollmentByUserId(Long userId);
+    //@Query("SELECT e FROM Enrollment e WHERE e.id.user.id = :userId") nao é necessário o JPA assume logo pelo nome do metodo que é por UserId. mas caso nao funcionasse...
+    List<Enrollment> findByUserId(Long userId);
 
 }

@@ -7,10 +7,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.luis.learnplatform.entities.DTO.EnrollmentDTO;
 import com.luis.learnplatform.entities.DTO.UserDTO;
 import com.luis.learnplatform.entities.DTO.UserInsertDTO;
 import com.luis.learnplatform.entities.User;
+import com.luis.learnplatform.factories.EnrollmentFactory;
 import com.luis.learnplatform.factories.UserFactory;
+import com.luis.learnplatform.services.EnrollmentService;
 import com.luis.learnplatform.services.UserService;
 import com.luis.learnplatform.services.exceptions.DatabaseException;
 import com.luis.learnplatform.services.exceptions.ResourceNotFoundException;
@@ -32,6 +35,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 
+import java.util.ArrayList;
 import java.util.List;
 
 @WebMvcTest(value = UserController.class, excludeAutoConfiguration = {SecurityAutoConfiguration.class})
@@ -42,15 +46,20 @@ public class UserControllerTests {
     private MockMvc mockMvc;
 
     @MockitoBean
+    private EnrollmentService enrollmentService;
+
+    @MockitoBean
     private UserService userService;
 
     @Autowired
     private ObjectMapper objectMapper;
 
-    private Long existingUserId, nonExistingUserId, dependentId;
+    private Long existingUserId, nonExistingUserId, dependentId, existingUserIdWithEnrollments;
     private User user,userAdmin;
     private UserDTO userDTO, userDTOAdmin, userInsertDTO;
     private PageImpl<UserDTO> dtos;
+    private List<EnrollmentDTO> enrollmentsDTO;
+    private EnrollmentDTO enrollmentDTO;
 
     @BeforeEach
     void setUp() {
@@ -63,6 +72,10 @@ public class UserControllerTests {
         existingUserId = user.getId();
         nonExistingUserId = 10L;
         dependentId = 2L;
+        enrollmentDTO = EnrollmentFactory.createEnrollmentDTO();
+        existingUserIdWithEnrollments = 1L;
+        enrollmentsDTO=new ArrayList<>();
+        enrollmentsDTO.add(enrollmentDTO);
 
 
         Mockito.when(userService.findAll(any(),any(Pageable.class))).thenReturn(dtos);
@@ -75,6 +88,8 @@ public class UserControllerTests {
         Mockito.when(userService.insert(any())).thenReturn(userDTO);
         Mockito.when(userService.update(eq(existingUserId),any())).thenReturn(userDTO);
         Mockito.when(userService.update(eq(nonExistingUserId),any())).thenThrow(ResourceNotFoundException.class);
+        Mockito.when(enrollmentService.findEnrollmentsByUserId(existingUserIdWithEnrollments)).thenReturn(enrollmentsDTO);
+        Mockito.when(enrollmentService.findEnrollmentsByUserId(nonExistingUserId)).thenThrow(ResourceNotFoundException.class);
 
     }
 
@@ -294,6 +309,30 @@ public class UserControllerTests {
                         .accept(MediaType.APPLICATION_JSON));
 
         result.andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void findEnrollmentsByUserIdShouldReturnListOfEnrollmentDTOsWhenUserIdExists() throws Exception {
+
+        ResultActions result=
+                mockMvc.perform(get("/users/{id}/enrollments", existingUserIdWithEnrollments)
+                        .accept(MediaType.APPLICATION_JSON));
+
+        result.andExpect(status().isOk());
+        result.andExpect(jsonPath("$[0].offerId").exists());
+        result.andExpect(jsonPath("$[0].offerId").value(enrollmentDTO.getOfferId()));
+
+    }
+
+    @Test
+    public void findEnrollmentsByUserIdShouldThrowResourceNotFoundExceptionWhenUserIdDoesNotExist() throws Exception {
+
+        ResultActions result=
+                mockMvc.perform(get("/users/{id}/enrollments", nonExistingUserId)
+                        .accept(MediaType.APPLICATION_JSON));
+
+        result.andExpect(status().isNotFound());
+
     }
 
 

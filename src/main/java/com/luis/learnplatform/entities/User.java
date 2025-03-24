@@ -26,7 +26,7 @@ public class User implements UserDetails{
     @OneToMany(mappedBy = "user")
     private Set<Notification> notifications=new HashSet<>();
 
-    @OneToMany(mappedBy = "id.user")
+    @OneToMany(mappedBy = "user")
     private Set<Enrollment> enrollments=new HashSet<>();
 
     public User() {

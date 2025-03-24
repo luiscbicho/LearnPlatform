@@ -12,13 +12,27 @@ import java.util.*;
 public class Enrollment {
 
     @EmbeddedId
-    private EnrollmentPK id=new EnrollmentPK();
+    private EnrollmentPK id;
     @Column(columnDefinition = "TIMESTAMP WITHOUT TIME ZONE")
     private Instant enrollMoment;
     @Column(columnDefinition = "TIMESTAMP WITHOUT TIME ZONE")
     private Instant refundMoment;
     private boolean available;
     private boolean onlyUpdate;
+
+    @ManyToOne
+    @MapsId("userId") // Relaciona o campo userId da chave primaria
+    @JoinColumn(name="user_id", insertable=false, updatable=false)
+    private User user;
+
+    @ManyToOne
+    @MapsId("offerId") // Relaciona o campo offerId da chave primaria
+    @JoinColumn(name="offer_id", insertable=false, updatable=false)
+    private Offer offer;
+
+    /*Atributos insertable = false, updatable = false são usados nas anotações @JoinColumn quando se está mapeando
+    um relacionamento usando uma chave primária composta. Esses atributos indicam que o JPA não deve incluir esses
+    campos em comandos INSERT ou UPDATE, pois os valores já estão sendo gerenciados pelo @EmbeddedId.*/
 
     @ManyToMany(mappedBy = "enrollmentsDone")
     private Set<Lesson> lessonsDone=new HashSet<>();
@@ -31,8 +45,7 @@ public class Enrollment {
     }
 
     public Enrollment(User user,Offer offer, Instant enrollMoment, Instant refundMoment, boolean available, boolean onlyUpdate) {
-        id.setUser(user);
-        id.setOffer(offer);
+        id=new EnrollmentPK(user.getId(),offer.getId());
         this.enrollMoment = enrollMoment;
         this.refundMoment = refundMoment;
         this.available = available;
@@ -40,19 +53,19 @@ public class Enrollment {
     }
 
    public User getStudent() {
-        return id.getUser();
+        return user;
    }
 
    public void setStudent(User user) {
-        id.setUser(user);
+        this.user = user;
    }
 
    public Offer getOffer() {
-        return id.getOffer();
+        return offer;
    }
 
    public void setOffer(Offer offer) {
-        id.setOffer(offer);
+        this.offer = offer;
    }
 
     public Instant getEnrollMoment() {

@@ -28,7 +28,7 @@ public class Offer {
     @OneToMany(mappedBy = "offer")
     private List<Topic> topics=new ArrayList<>();
 
-    @OneToMany(mappedBy = "id.offer")
+    @OneToMany(mappedBy = "offer")
     private Set<Enrollment> enrollments=new HashSet<>();
 
     public Offer() {
